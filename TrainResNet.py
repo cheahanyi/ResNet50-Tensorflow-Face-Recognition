@@ -6,16 +6,21 @@ Author: Kaihua Tang
 
 import math
 import time
-import tensorflow as tf
+# import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import ResNet as resnet
 import numpy as np
 import scipy.io as scio
 from scipy import misc
 from utils import *
+from imageio import imread
+
+
 
 # image size
-WIDTH = 224
-HEIGHT = 224
+WIDTH = 250
+HEIGHT = 250
 CHANNELS = 3
 #"Mini batch size"
 MINI_BATCH_SIZE = 32
@@ -24,10 +29,10 @@ label_path = "./label/label_1200.npy"
 #"Path of image file names"
 image_name_path = "./label/name_1200.npy"
 # image path
-parentPath = "F:\\CACD2000_Crop\\"
+parentPath = "C:\\CACD"
 # data Path: n * 224 * 224 * 3 numpy matrix
-data_path = 'F:\\Dataset\\1200_data.npy'
-
+# data_path = 'C:\\Dataset\\1200_data.npy'
+data_path = None
 
 
 def Train():
@@ -65,7 +70,7 @@ def Train():
     trainNameList = np.load(image_name_path)
     trainLabelList = np.load(label_path)
     if(data_path is None):
-        allImageData = load_all_image(trainNameList, HEIGHT, WIDTH, CHANNELS, parentPath)
+        allImageData = load_all_image(trainNameList, HEIGHT, WIDTH, CHANNELS, parentPath, create_npy = True)
     else:
         allImageData = np.load(data_path)
 
