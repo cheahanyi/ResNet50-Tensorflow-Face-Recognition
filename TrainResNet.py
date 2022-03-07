@@ -6,9 +6,9 @@ Author: Kaihua Tang
 
 import math
 import time
-# import tensorflow as tf
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
+import tensorflow as tf
+# import tensorflow.compat.v1 as tf
+# tf.disable_v2_behavior()
 import ResNet as resnet
 import numpy as np
 import scipy.io as scio
@@ -19,8 +19,8 @@ from imageio import imread
 
 
 # image size
-WIDTH = 250
-HEIGHT = 250
+WIDTH = 224
+HEIGHT = 224
 CHANNELS = 3
 #"Mini batch size"
 MINI_BATCH_SIZE = 32
@@ -29,9 +29,9 @@ label_path = "./label/label_1200.npy"
 #"Path of image file names"
 image_name_path = "./label/name_1200.npy"
 # image path
-parentPath = "C:\\CACD"
+parentPath = "../../CACD2000_resized/"
 # data Path: n * 224 * 224 * 3 numpy matrix
-# data_path = 'C:\\Dataset\\1200_data.npy'
+# data_path = 'C:/FYP/ResNet50-Tensorflow-Face-Recognition-master/ResNet50-Tensorflow-Face-Recognition/1200_data.npy'
 data_path = None
 
 
@@ -44,7 +44,8 @@ def Train():
     NUM_EPOCHS: number of epochs
     save_frequency: frequency of saving model (number of epoches)
     """
-    model_path ="./model/03.npy"
+    # model_path ="./model/03.npy"
+    model_path = None
     LABELSNUM = 1200
     learning_rate_orig = 1e-05
     NUM_EPOCHS = 1000
@@ -67,7 +68,7 @@ def Train():
     monitoring_rate = 50
     
     #Lists that store name of image and its label
-    trainNameList = np.load(image_name_path)
+    trainNameList = np.load(image_name_path, allow_pickle=True)
     trainLabelList = np.load(label_path)
     if(data_path is None):
         allImageData = load_all_image(trainNameList, HEIGHT, WIDTH, CHANNELS, parentPath, create_npy = True)
@@ -77,12 +78,12 @@ def Train():
     #num of total training image
     num_train_image = trainLabelList.shape[0]
 
-    with tf.Session() as sess:
-        images = tf.placeholder(tf.float32, shape = [None, WIDTH, HEIGHT, CHANNELS])
+    with tf.compat.v1.Session() as sess:
+        images = tf.compat.v1.placeholder(tf.float32, shape = [None, WIDTH, HEIGHT, CHANNELS])
         if(is_sparse):
-            labels = tf.placeholder(tf.int64, shape = [None])
+            labels = tf.compat.v1.placeholder(tf.int64, shape = [None])
         else:
-            labels = tf.placeholder(tf.float32, shape = [None, LABELSNUM])
+            labels = tf.compat.v1.placeholder(tf.float32, shape = [None, LABELSNUM])
 
         # build resnet model
         resnet_model = resnet.ResNet(ResNet_npy_path = model_path)
@@ -105,12 +106,12 @@ def Train():
             cost = tf.reduce_sum(loss)
         with tf.name_scope("train"):
             global_steps = tf.Variable(0)
-            learning_rate = tf.train.exponential_decay(learning_rate_orig, global_steps, num_minibatches * 40, 0.1, staircase = True)
+            learning_rate = tf.compat.v1.train.exponential_decay(learning_rate_orig, global_steps, num_minibatches * 40, 0.1, staircase = True)
             #train = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
             #train = tf.train.AdamOptimizer(learning_rate).minimize(cost)
-            train = tf.train.MomentumOptimizer(learning_rate, 0.9).minimize(cost)
+            train = tf.compat.v1.train.MomentumOptimizer(learning_rate, 0.9).minimize(cost)
 
-        sess.run(tf.global_variables_initializer())
+        sess.run(tf.compat.v1.global_variables_initializer())
         print(resnet_model.get_var_count())
 
         if(tensorboard_on):
