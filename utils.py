@@ -9,6 +9,8 @@ import numpy as np
 import time
 import math
 import random
+import imageio
+import cv2
 
 
 def random_mini_batches(totalSize, mini_batch_size = 64, random = True):
@@ -42,9 +44,13 @@ def load_all_image(nameList, h, w, c, parentPath, create_npy = False):
     """
     all_size = len(nameList)
     all_data = np.zeros((all_size, h, w, c), dtype = "uint8")
+
+    counter = 0
+
     for i in range(all_size):
         tmp_img = load_images(parentPath + nameList[i])
         all_data[i,:,:,:] = tmp_img[:,:,:]
+        counter += 1
     if(create_npy):
         np.save('./1200_data.npy',all_data)
     return all_data
@@ -80,5 +86,7 @@ def load_images(path):
     Load multiple images.
     :param paths: The image paths.
     """
-    img = misc.imread(path, mode="RGB").astype(float)
+
+    # print(path)
+    img = imageio.imread(uri=path).astype(float)
     return img
