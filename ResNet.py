@@ -38,9 +38,12 @@ class ResNet:
         # Preprocessing: Turning RGB to BGR - Mean.
         BGR_MEAN = [104.7546, 124.328, 167.1754]
         red, green, blue = tf.split(axis=3, num_or_size_splits=3, value=rgb)
+        print(red.get_shape().as_list()[1:], green.get_shape().as_list()[1:], blue.get_shape().as_list()[1:])
+        print("we at the assert")
         assert red.get_shape().as_list()[1:] == [224, 224, 1]
         assert green.get_shape().as_list()[1:] == [224, 224, 1]
         assert blue.get_shape().as_list()[1:] == [224, 224, 1]
+        print("we passed the assert")
         bgr = tf.concat(axis=3, values=[
             blue - BGR_MEAN[0],
             green - BGR_MEAN[1],
@@ -119,7 +122,7 @@ class ResNet:
         """
         _BATCH_NORM_DECAY = 0.99
         _BATCH_NORM_EPSILON = 1e-12
-        return tf.layers.batch_normalization(inputs=inputsTensor, axis = 3, momentum=_BATCH_NORM_DECAY, epsilon=_BATCH_NORM_EPSILON, center=True, scale=True, training=self.is_training)
+        return tf.compat.v1.layers.batch_normalization(inputs=inputsTensor, axis = 3, momentum=_BATCH_NORM_DECAY, epsilon=_BATCH_NORM_EPSILON, center=True, scale=True, training=self.is_training)
 
     def avg_pool(self, bottom, kernal_size = 2, stride = 2, name = "avg"):
         """
@@ -154,7 +157,7 @@ class ResNet:
         """
         print(name + ":")
         print(bottom.get_shape().as_list())
-        with tf.variable_scope(name):
+        with tf.compat.v1.variable_scope(name):
             filt, conv_biases = self.get_conv_var(kernal_size, in_channels, out_channels, name)
 
             conv = tf.nn.conv2d(bottom, filt, [1,stride,stride,1], padding='SAME')
@@ -173,7 +176,7 @@ class ResNet:
         """
         print(name + ":")
         print(bottom.get_shape().as_list())
-        with tf.variable_scope(name):
+        with tf.compat.v1.variable_scope(name):
             weights, biases = self.get_fc_var(in_size, out_size, name)
 
             x = tf.reshape(bottom, [-1, in_size])
@@ -192,10 +195,10 @@ class ResNet:
         out_channels : number of output filters
         name : block_layer name
         """
-        initial_value = tf.truncated_normal([filter_size, filter_size, in_channels, out_channels], 0.0, stddev = 1 / math.sqrt(float(filter_size * filter_size)))
+        initial_value = tf.compat.v1.truncated_normal([filter_size, filter_size, in_channels, out_channels], 0.0, stddev = 1 / math.sqrt(float(filter_size * filter_size)))
         filters = self.get_var(initial_value, name, 0, name + "_filters")
 
-        initial_value = tf.truncated_normal([out_channels], 0.0, 1.0)
+        initial_value = tf.compat.v1.truncated_normal([out_channels], 0.0, 1.0)
         biases = self.get_var(initial_value, name, 1, name + "_biases")
 
         return filters, biases
@@ -206,10 +209,10 @@ class ResNet:
         out_size : number of output feature size
         name : block_layer name
         """
-        initial_value = tf.truncated_normal([in_size, out_size], 0.0, stddev = 1 / math.sqrt(float(in_size)))
+        initial_value = tf.compat.v1.truncated_normal([in_size, out_size], 0.0, stddev = 1 / math.sqrt(float(in_size)))
         weights = self.get_var(initial_value, name, 0, name + "_weights")
 
-        initial_value = tf.truncated_normal([out_size], 0.0, 1.0)
+        initial_value = tf.compat.v1.truncated_normal([out_size], 0.0, 1.0)
         biases = self.get_var(initial_value, name, 1, name + "_biases")
 
         return weights, biases
